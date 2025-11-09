@@ -9,7 +9,7 @@ const Udrw = require('../models/Udrw');
 router.get('/', async (req, res) => {
   try {
     // 全取得
-    const udrwsBaseData = await Udrw.find({});
+    const udrwsBaseData = await Udrw.find({}).sort({ pid: -1 });
 
     // 個別情報加工
     const udrws = await Promise.all(

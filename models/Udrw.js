@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const UdrwSchema = new mongoose.Schema({
   pid: { type: String, required: true , unique: true },
+  name: String,
   relationalBid: String,
   link: {
     original: {
