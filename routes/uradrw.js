@@ -8,21 +8,33 @@ const Udrw = require('../models/Udrw');
 /* GET users listing. */
 router.get('/', async (req, res) => {
   try {
-    // 全取得
+    // udrws全取得
     const udrwsBaseData = await Udrw.find({}).sort({ pid: -1 });
 
-    // 個別情報加工
-    const udrws = await Promise.all(
-      udrwsBaseData.map(async (udrw) => {
-        return {
-          ...udrw.toObject(),
-          modal: `modal-${udrw.pid}`,
-          carousel: `carousel-${udrw.pid}`
-        };
-      })
-    );
+    // relationalBid抽出
+    const requiredBids = udrwsBaseData.map(udrw => udrw.relationalBid).filter(bid => bid);
+    const prostitutes = await Prostitute.find({ bid: { $in: requiredBids } });
+    const prostituteMap = prostitutes.reduce((map, p) => {
+      map[p.bid] = p.name;
+      return map;
+    }, {});
 
-    console.log(udrws);
+    // 個別情報加工
+    const udrws = udrwsBaseData.map(udrw => {
+      const udrwObject = udrw.toObject();
+
+      let prstName = 'モデル不明';
+      if (udrwObject.relationalBid) {
+          prstName = prostituteMap[udrwObject.relationalBid] || 'モデル不明';
+      }
+
+      return {
+        ...udrwObject,
+        prstName: prstName,
+        modal: `modal-${udrw.pid}`,
+        carousel: `carousel-${udrw.pid}`
+      };
+    });
 
     // データを渡す
     res.render('uradrw', { udrws: udrws });
