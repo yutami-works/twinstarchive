@@ -1,0 +1,46 @@
+<div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-4">
+  <div class="card h-100">
+    <img
+      src="<%= udrw.images[0].original.url %>"
+      class="card-img-top"
+      alt="メイン画像"
+      data-bs-toggle="modal"
+      data-bs-target="#<%= udrw.modal %>"
+    />
+    <div class="card-body">
+      <h5 class="card-title">
+        <a href="<%=udrw.link.original.url %>" target="_blank">
+          <%= udrw.pid %>
+        </a>
+      </h5>
+      <row>
+        <div class="card-text col-12">モデル：<%= udrw.pid %></div>
+      </row>
+    </div>
+    <%
+      let productStatus = '不明'
+      let badgeColor = 'bg-secondary';
+
+      if (udrw.link.original.status === 'active') {
+        productStatus = '在庫アリ';
+        badgeColor = 'bg-success';
+      } else if (udrw.link.original.status === 'hidden') {
+        productStatus = '非表示';
+        badgeColor = 'bg-warning';
+      } else if (udrw.link.original.status === 'deleted') {
+        productStatus = '削除済み';
+        badgeColor = 'bg-danger';
+      } else {
+        productStatus = '在庫ナシ';
+        badgeColor = 'bg-primary';
+      }
+    %>
+    <div class="card-footer text-center">
+      <h5>
+        <span class="badge <%= badgeColor %>"><%= productStatus %></span>
+      </h5>
+    </div>
+  </div>
+  <!-- modal -->
+  <%- include('./udrw-modal', { udrw: udrw }) %>
+</div>

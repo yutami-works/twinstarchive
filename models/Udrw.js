@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const UdrwsSchema = new mongoose.Schema({
+const UdrwSchema = new mongoose.Schema({
   pid: { type: String, required: true , unique: true },
   relationalBid: String,
   link: {
@@ -13,8 +13,8 @@ const UdrwsSchema = new mongoose.Schema({
       status: String
     }
   },
-  images: {
-    main: {
+  images: [
+    {
       original: {
         url: String,
         status: String
@@ -23,20 +23,8 @@ const UdrwsSchema = new mongoose.Schema({
         url: String,
         status: String
       }
-    },
-    sub: [
-      {
-        original: {
-          url: String,
-          status: String
-        },
-        archive: {
-          url: String,
-          status: String
-        }
-      }
-    ]
-  }
+    }
+  ]
 }, { collection: 'udrws', timestamps: true });
 
 module.exports = mongoose.model('Udrw', UdrwSchema);
