@@ -37,6 +37,8 @@
         productStatus = '在庫ナシ';
         badgeColor = 'bg-primary';
       }
+
+      const isFullArchived = udrw.images.every(image => image.archive.status === 'active');
     %>
     <div class="card-footer d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center">
@@ -50,6 +52,9 @@
           >
             <span class="badge bg-primary">アーカイブ取得済み</span>
           </a>
+        <% } %>
+        <% if (isFullArchived) { %>
+          <span title="全画像アーカイブ完了" class="ms-1" style="font-size: 1.2rem;">👑</span>
         <% } %>
       </div>
     </div>
