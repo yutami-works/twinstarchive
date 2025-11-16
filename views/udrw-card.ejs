@@ -14,7 +14,9 @@
         </a>
       </h5>
       <div class="row g-0">
-        <div class="card-text col-12">商品番号：<%= udrw.pid %></div>
+        <div class="card-text col-12">
+          商品番号：<%= udrw.pid %><a href="/uradrw/edit/<%= udrw._id %>" class="ms-2">(編集)</a>
+        </div>
         <div class="card-text col-12">モデル：<%= udrw.prstName %></div>
       </div>
     </div>

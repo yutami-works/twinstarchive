@@ -97,6 +97,74 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// GET /uradrw/edit/:id: 編集フォーム表示
+router.get('/edit/:id', async (req, res) => {
+  try {
+    const udrw = await Udrw.findById(req.params.id);
+    if (!udrw) {
+      return res.status(404).send('Udrwが見つかりません');
+    }
+    // Prostituteの全量を取得（プルダウン用）
+    const prostitutes = await Prostitute.find({}).select('bid name').sort('bid');
+
+    // udrw.toObject() でEJSに渡す
+    res.render('udrw-edit', { udrw: udrw.toObject(), prostitutes: prostitutes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('編集フォームの表示エラー');
+  }
+});
+
+// POST /uradrw/edit/:id: 編集処理
+router.post('/edit/:id', async (req, res) => {
+  const { name, relationalBid, originalStatus, archiveUrl, archiveStatus } = req.body;
+
+  try {
+    const udrwToUpdate = await Udrw.findById(req.params.id);
+    if (!udrwToUpdate) {
+      return res.status(404).send('Udrwが見つかりません');
+    }
+
+    // 既存のimages配列を取得
+    const existingImages = udrwToUpdate.images;
+
+    // 画像アーカイブの再試行処理
+    const imageUpdatePromises = existingImages.map(async (image) => {
+      // 既存の画像がarchive.statusが'none'の場合のみ再試行
+      if (image.archive.status === 'none') {
+        console.log(`アーカイブ再試行開始: ${image.original.url}`);
+        const newArchiveData = await generate73ArchiveUrl(image.original.url);
+
+        // 新しいアーカイブデータで更新
+        return {
+          original: image.original,
+          archive: newArchiveData // 成功: { url: '...', status: 'active' }, 失敗: { url: '-', status: 'none' }
+        };
+      }
+      // それ以外は現状維持
+      return image;
+    });
+
+    // 全てのアーカイブ再試行処理を待つ
+    const updatedImages = await Promise.all(imageUpdatePromises);
+
+    // Udrwオブジェクトの更新
+    udrwToUpdate.name = name;
+    udrwToUpdate.relationalBid = relationalBid;
+    udrwToUpdate.link.original.status = originalStatus;
+    udrwToUpdate.link.archive.url = archiveUrl || '-';
+    udrwToUpdate.link.archive.status = archiveStatus;
+    udrwToUpdate.images = updatedImages; // 更新されたimages配列をセット
+
+    await udrwToUpdate.save(); // データベースに保存
+
+    res.redirect('/uradrw'); // 更新完了後、一覧画面へリダイレクト
+  } catch (error) {
+    console.error('Udrw更新エラー:', error);
+    res.status(500).send('Udrwの更新中にエラーが発生しました。');
+  }
+});
+
 /* GET default page */
 router.get('/', async (req, res) => {
   try {
